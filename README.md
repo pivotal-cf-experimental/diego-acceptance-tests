@@ -41,4 +41,4 @@ using self-signed certificates, add
 
 to your integration_config.json as well.
 
-[cats](https://github.com/cloudfoundry/cf-acceptance-tests)
+[cats]: https://github.com/cloudfoundry/cf-acceptance-tests
