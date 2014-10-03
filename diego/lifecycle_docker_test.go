@@ -3,10 +3,11 @@ package diego
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
-	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -33,12 +34,12 @@ var _ = Describe("Docker Application Lifecycle", func() {
 	domain := helpers.LoadConfig().AppsDomain
 
 	BeforeEach(func() {
-		createDockerAppPayload = `{"name": "%s", 
-								   "memory":512, 
-								   "instances":1, 
-								   "disk_quota":1024, 
-								   "space_guid":"%s", 
-								   "docker_image":"cloudfoundry/inigodockertest:latest", 
+		createDockerAppPayload = `{"name": "%s",
+								   "memory":512,
+								   "instances":1,
+								   "disk_quota":1024,
+								   "space_guid":"%s",
+								   "docker_image":"cloudfoundry/inigodockertest:latest",
 								   "command":"/dockerapp"}`
 
 	})
@@ -68,12 +69,12 @@ var _ = Describe("Docker Application Lifecycle", func() {
 	})
 
 	Describe("running the app", func() {
-		It("merges the warden and docker environment variables", func() {
+		It("merges the garden and docker environment variables", func() {
 			env_json := helpers.CurlApp(appName, "/env")
 			var env_vars map[string]string
 			json.Unmarshal([]byte(env_json), &env_vars)
 
-			// warden set values should win
+			// garden set values should win
 			Ω(env_vars).Should(HaveKey("HOME"))
 			Ω(env_vars).ShouldNot(HaveKeyWithValue("HOME", "/home/some_docker_user"))
 			Ω(env_vars).Should(HaveKey("VCAP_APPLICATION"))
@@ -88,11 +89,11 @@ var _ = Describe("Docker Application Lifecycle", func() {
 
 	Describe("running a docker app without a start command ", func() {
 		BeforeEach(func() {
-			createDockerAppPayload = `{"name": "%s", 
-									   "memory":512, 
-									   "instances":1, 
-									   "disk_quota":1024, 
-									   "space_guid":"%s", 
+			createDockerAppPayload = `{"name": "%s",
+									   "memory":512,
+									   "instances":1,
+									   "disk_quota":1024,
+									   "space_guid":"%s",
 									   "docker_image":"cloudfoundry/inigodockertest:latest"}`
 		})
 
