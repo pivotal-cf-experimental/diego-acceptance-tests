@@ -41,7 +41,7 @@ var _ = Describe("Application Lifecycle", func() {
 		describeLifeCycle := func() {
 			Describe("stopping and starting the app", func() {
 				It("makes the app unreachable while it is stopped", func() {
-					Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
+					Eventually(helpers.CurlingAppRoot(appName), DEFAULT_TIMEOUT).Should(ContainSubstring("Hi, I'm Bash!"))
 
 					Eventually(cf.Cf("stop", appName), DEFAULT_TIMEOUT).Should(Exit(0))
 					Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
