@@ -91,7 +91,37 @@ var _ = Describe("Application Lifecycle", func() {
 			describeLifeCycle()
 		})
 
-		Describe("An existing DEA-based app being migrated to Diego", func() {
+		Describe("An existing DEA-based app being migrated to Diego (staging only)", func() {
+			BeforeEach(func() {
+				Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "-b", DEA_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
+				Eventually(cf.Cf("set-env", appName, "CF_DIEGO_BETA", "true"), DEFAULT_TIMEOUT).Should(Exit(0))
+			})
+
+			Context("After repushing the app with a Diego compatible buildpack", func() {
+				var push *Session
+
+				BeforeEach(func() {
+					push = cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "-b", DIEGO_NULL_BUILDPACK)
+					Eventually(push, CF_PUSH_TIMEOUT).Should(Exit(0))
+				})
+
+				describeLifeCycle()
+
+				It("is restaged with Diego", func() {
+					Expect(push).To(Say("Uploading droplet, artifacts cache..."))
+				})
+			})
+
+			Context("After restarting the app without changing the buildpack", func() {
+				It("fails to restage because Diego does not support git buildpacks", func() {
+					restart := cf.Cf("restart", appName)
+					Eventually(restart, CF_PUSH_TIMEOUT).Should(Exit(1))
+					Expect(restart).To(Say("Staging error: cannot get instances since staging failed"))
+				})
+			})
+		})
+
+		Describe("An existing DEA-based app being migrated to Diego (staging & running)", func() {
 			BeforeEach(func() {
 				Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "-b", DEA_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
 
