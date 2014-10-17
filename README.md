@@ -26,7 +26,8 @@ cat > integration_config.json <<EOF
   "api": "api.10.244.0.34.xip.io",
   "admin_user": "admin",
   "admin_password": "admin",
-  "apps_domain": "10.244.0.34.xip.io"
+  "apps_domain": "10.244.0.34.xip.io",
+  "skip_ssl_validation": true
 }
 EOF
 export CONFIG=$PWD/integration_config.json

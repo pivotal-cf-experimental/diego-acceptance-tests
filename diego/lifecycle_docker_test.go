@@ -3,7 +3,6 @@ package diego
 import (
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -13,10 +12,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
-)
-
-const (
-	DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT = 300 * time.Second
 )
 
 type SpaceJson struct {
@@ -47,7 +42,7 @@ var _ = Describe("Docker Application Lifecycle", func() {
 	JustBeforeEach(func() {
 		url := fmt.Sprintf("/v2/spaces?q=name%%3A%s", context.RegularUserContext().Space)
 		jsonResults := SpaceJson{}
-		curl := cf.Cf("curl", url).Wait(DEFAULT_TIMEOUT)
+		curl := cf.Cf("curl", url).Wait()
 		Expect(curl).To(Exit(0))
 
 		json.Unmarshal(curl.Out.Contents(), &jsonResults)
@@ -55,17 +50,17 @@ var _ = Describe("Docker Application Lifecycle", func() {
 		Expect(spaceGuid).NotTo(Equal(""))
 
 		payload := fmt.Sprintf(createDockerAppPayload, appName, spaceGuid)
-		Eventually(cf.Cf("curl", "/v2/apps", "-X", "POST", "-d", payload), DEFAULT_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_BETA", "true"), DEFAULT_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_RUN_BETA", "true"), DEFAULT_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("create-route", context.RegularUserContext().Space, domain, "-n", appName), DEFAULT_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("map-route", appName, domain, "-n", appName), DEFAULT_TIMEOUT).Should(Exit(0))
+		Eventually(cf.Cf("curl", "/v2/apps", "-X", "POST", "-d", payload)).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_RUN_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("create-route", context.RegularUserContext().Space, domain, "-n", appName)).Should(Exit(0))
+		Eventually(cf.Cf("map-route", appName, domain, "-n", appName)).Should(Exit(0))
 		Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
 		Eventually(helpers.CurlingAppRoot(appName)).Should(Equal("0"))
 	})
 
 	AfterEach(func() {
-		Eventually(cf.Cf("delete", appName, "-f"), DEFAULT_TIMEOUT).Should(Exit(0))
+		Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 	})
 
 	Describe("running the app", func() {
@@ -107,33 +102,33 @@ var _ = Describe("Docker Application Lifecycle", func() {
 		It("makes the app unreachable while it is stopped", func() {
 			Eventually(helpers.CurlingAppRoot(appName)).Should(Equal("0"))
 
-			Eventually(cf.Cf("stop", appName), DEFAULT_TIMEOUT).Should(Exit(0))
+			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
 
-			Eventually(cf.Cf("start", appName), DEFAULT_TIMEOUT).Should(Exit(0))
+			Eventually(cf.Cf("start", appName)).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(Equal("0"))
 		})
 	})
 
 	Describe("scaling the app", func() {
 		JustBeforeEach(func() {
-			Eventually(cf.Cf("stop", appName), DEFAULT_TIMEOUT).Should(Exit(0))
-			Eventually(cf.Cf("scale", appName, "-i", "3"), DEFAULT_TIMEOUT).Should(Exit(0))
-			Eventually(cf.Cf("start", appName), DEFAULT_TIMEOUT).Should(Exit(0))
+			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
+			Eventually(cf.Cf("scale", appName, "-i", "3")).Should(Exit(0))
+			Eventually(cf.Cf("start", appName)).Should(Exit(0))
 		})
 
-		It("Retrieves instance information for cf app", func() {
-			app := cf.Cf("app", appName).Wait(DEFAULT_TIMEOUT)
+		It("Retrieves instance information for cf app and cf apps", func() {
+			By("calling cf app")
+			app := cf.Cf("app", appName).Wait()
 			Expect(app).To(Exit(0))
 			Expect(app).To(Say("instances: [0-3]/3"))
 			Expect(app).To(Say("#0"))
 			Expect(app).To(Say("#1"))
 			Expect(app).To(Say("#2"))
 			Expect(app).ToNot(Say("#3"))
-		})
 
-		It("Retrieves instance information for cf apps", func() {
-			app := cf.Cf("apps").Wait(DEFAULT_TIMEOUT)
+			By("calling cf apps")
+			app = cf.Cf("apps").Wait()
 			Expect(app).To(Exit(0))
 			Expect(app).To(Say(appName))
 			Expect(app).To(Say("[0-3]/3"))
@@ -142,11 +137,11 @@ var _ = Describe("Docker Application Lifecycle", func() {
 
 	Describe("deleting", func() {
 		JustBeforeEach(func() {
-			Eventually(cf.Cf("delete", appName, "-f"), DEFAULT_TIMEOUT).Should(Exit(0))
+			Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 		})
 
 		It("removes the application and makes the app unreachable", func() {
-			Eventually(cf.Cf("app", appName), DEFAULT_TIMEOUT).Should(Say("not found"))
+			Eventually(cf.Cf("app", appName)).Should(Say("not found"))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
 		})
 	})

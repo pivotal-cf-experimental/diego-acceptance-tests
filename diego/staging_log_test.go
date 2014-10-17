@@ -19,12 +19,12 @@ var _ = Describe("An application being staged with Diego", func() {
 	})
 
 	AfterEach(func() {
-		Eventually(cf.Cf("delete", appName, "-f"), DEFAULT_TIMEOUT).Should(Exit(0))
+		Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 	})
 
 	It("has its staging log streamed during a push", func() {
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", DIEGO_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_BETA", "true"), DEFAULT_TIMEOUT).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_BETA", "true")).Should(Exit(0))
 
 		start := cf.Cf("start", appName)
 
