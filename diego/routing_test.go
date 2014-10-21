@@ -22,6 +22,10 @@ var _ = Describe("Adding and removing routes", func() {
 		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 	})
 
+	AfterEach(func() {
+		Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
+	})
+
 	It("should be able to add and remove routes", func() {
 		secondHost := generator.RandomName()
 
