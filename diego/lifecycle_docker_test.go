@@ -51,7 +51,7 @@ var _ = Describe("Docker Application Lifecycle", func() {
 
 		payload := fmt.Sprintf(createDockerAppPayload, appName, spaceGuid)
 		Eventually(cf.Cf("curl", "/v2/apps", "-X", "POST", "-d", payload)).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_STAGE_BETA", "true")).Should(Exit(0))
 		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_RUN_BETA", "true")).Should(Exit(0))
 		Eventually(cf.Cf("create-route", context.RegularUserContext().Space, domain, "-n", appName)).Should(Exit(0))
 		Eventually(cf.Cf("map-route", appName, domain, "-n", appName)).Should(Exit(0))
