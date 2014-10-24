@@ -17,7 +17,7 @@ var _ = Describe("Adding and removing routes", func() {
 	BeforeEach(func() {
 		appName = generator.RandomName()
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", DIEGO_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_STAGE_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, "DIEGO_STAGE_BETA", "true")).Should(Exit(0))
 		Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
 		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 	})

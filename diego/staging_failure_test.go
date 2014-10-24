@@ -20,7 +20,7 @@ var _ = Describe("When staging fails", func() {
 
 		//Diego needs a custom buildpack until the ruby buildpack lands
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "--no-start", "-b=http://example.com/so-not-a-thing/adlfijaskldjlkjaslbnalwieulfjkjsvas.zip"), CF_PUSH_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "CF_DIEGO_STAGE_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, "DIEGO_STAGE_BETA", "true")).Should(Exit(0))
 	})
 
 	AfterEach(func() {
