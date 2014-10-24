@@ -114,9 +114,9 @@ var _ = Describe("Application Lifecycle", func() {
 				})
 			})
 
-			Context("After restarting the app without changing the buildpack", func() {
+			Context("After restaging the app without changing the buildpack", func() {
 				It("fails to restage because Diego does not support git buildpacks", func() {
-					restart := cf.Cf("restart", appName)
+					restart := cf.Cf("restage", appName)
 					Eventually(restart, CF_PUSH_TIMEOUT).Should(Exit(1))
 					Expect(restart).To(Say("Staging error: cannot get instances since staging failed"))
 				})
