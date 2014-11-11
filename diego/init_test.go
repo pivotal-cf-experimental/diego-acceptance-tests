@@ -15,8 +15,11 @@ const (
 	LONG_CURL_TIMEOUT                     = 4 * time.Minute
 	DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT = 5 * time.Minute
 
-	DIEGO_NULL_BUILDPACK = "https://github.com/cloudfoundry-incubator/null-buildpack/archive/master.zip"
-	DEA_NULL_BUILDPACK   = "https://github.com/cloudfoundry-incubator/null-buildpack"
+	ZIP_NULL_BUILDPACK = "https://github.com/cloudfoundry-incubator/null-buildpack/archive/master.zip"
+	GIT_NULL_BUILDPACK = "https://github.com/cloudfoundry-incubator/null-buildpack"
+
+	DIEGO_STAGE_BETA = "DIEGO_STAGE_BETA"
+	DIEGO_RUN_BETA   = "DIEGO_RUN_BETA"
 )
 
 var context helpers.SuiteContext
@@ -25,6 +28,7 @@ func TestApplications(t *testing.T) {
 	RegisterFailHandler(Fail)
 
 	SetDefaultEventuallyTimeout(time.Minute)
+	SetDefaultEventuallyPollingInterval(time.Second)
 
 	config := helpers.LoadConfig()
 	context = helpers.NewContext(config)

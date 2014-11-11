@@ -13,25 +13,21 @@ import (
 
 var _ = Describe("When staging fails", func() {
 	var appName string
-	var start *Session
 
 	BeforeEach(func() {
 		appName = generator.RandomName()
 
 		//Diego needs a custom buildpack until the ruby buildpack lands
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "--no-start", "-b=http://example.com/so-not-a-thing/adlfijaskldjlkjaslbnalwieulfjkjsvas.zip"), CF_PUSH_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "DIEGO_STAGE_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
 	})
 
 	AfterEach(func() {
 		Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 	})
 
-	JustBeforeEach(func() {
-		start = cf.Cf("start", appName)
-	})
-
 	It("informs the user in the CLI output and the logs", func() {
+		start := cf.Cf("start", appName)
 		Eventually(start, CF_PUSH_TIMEOUT).Should(Exit(1))
 		Ω(start.Out).Should(gbytes.Say("Staging error: cannot get instances since staging failed"))
 
@@ -39,6 +35,6 @@ var _ = Describe("When staging fails", func() {
 			logs := cf.Cf("logs", appName, "--recent")
 			Expect(logs.Wait()).To(Exit(0))
 			return logs
-		}).Should(gbytes.Say("Failed to Download Buildpack"))
+		}).Should(gbytes.Say("Failed to download buildpack"))
 	})
 })

@@ -51,8 +51,8 @@ var _ = Describe("Docker Application Lifecycle", func() {
 
 		payload := fmt.Sprintf(createDockerAppPayload, appName, spaceGuid)
 		Eventually(cf.Cf("curl", "/v2/apps", "-X", "POST", "-d", payload)).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "DIEGO_STAGE_BETA", "true")).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, "DIEGO_RUN_BETA", "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
+		Eventually(cf.Cf("set-env", appName, DIEGO_RUN_BETA, "true")).Should(Exit(0))
 		Eventually(cf.Cf("create-route", context.RegularUserContext().Space, domain, "-n", appName)).Should(Exit(0))
 		Eventually(cf.Cf("map-route", appName, domain, "-n", appName)).Should(Exit(0))
 		Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
@@ -105,7 +105,7 @@ var _ = Describe("Docker Application Lifecycle", func() {
 			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
 
-			Eventually(cf.Cf("start", appName)).Should(Exit(0))
+			Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(Equal("0"))
 		})
 	})
@@ -114,7 +114,7 @@ var _ = Describe("Docker Application Lifecycle", func() {
 		JustBeforeEach(func() {
 			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
 			Eventually(cf.Cf("scale", appName, "-i", "3")).Should(Exit(0))
-			Eventually(cf.Cf("start", appName)).Should(Exit(0))
+			Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
 		})
 
 		It("Retrieves instance information for cf app and cf apps", func() {
