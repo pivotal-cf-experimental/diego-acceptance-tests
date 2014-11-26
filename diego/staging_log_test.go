@@ -29,7 +29,7 @@ var _ = Describe("An application being staged with Diego", func() {
 		start := cf.Cf("start", appName)
 
 		Eventually(start, CF_PUSH_TIMEOUT).Should(Exit(0))
-		Expect(start).Should(Say("Downloaded App Package"))
+		Expect(start).Should(Say("Downloaded app package"))
 		Expect(start).Should(Say(`Staging\.\.\.`))
 	})
 })
