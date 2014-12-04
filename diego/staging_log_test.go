@@ -30,6 +30,8 @@ var _ = Describe("An application being staged with Diego", func() {
 
 		Eventually(start, CF_PUSH_TIMEOUT).Should(Exit(0))
 		Expect(start).Should(Say("Downloaded app package"))
-		Expect(start).Should(Say(`Staging\.\.\.`))
+		Expect(start).Should(Say("Staging\\.\\.\\."))
+		Expect(start).Should(Say("Staging complete"))
+		Expect(start).Should(Say("Uploading complete"))
 	})
 })
