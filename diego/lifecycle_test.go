@@ -16,7 +16,7 @@ var _ = Describe("Application Lifecycle", func() {
 
 	Context("Application with all buildpacks", func() {
 		AfterEach(func() {
-			Eventually(cf.Cf("logs", appName, "--recent"), CF_PUSH_TIMEOUT).Should(Exit(0))
+			Eventually(cf.Cf("logs", appName, "--recent")).Should(Exit())
 			Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 		})
 

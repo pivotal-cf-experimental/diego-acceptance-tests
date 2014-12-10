@@ -25,6 +25,7 @@ var _ = Describe("Getting instance information", func() {
 	})
 
 	AfterEach(func() {
+		Eventually(cf.Cf("logs", appName, "--recent")).Should(Exit())
 		Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 	})
 
