@@ -25,10 +25,13 @@ type SpaceJson struct {
 var createDockerAppPayload string
 
 var _ = Describe("Docker Application Lifecycle", func() {
-	appName := generator.RandomName()
+	var appName string
+
 	domain := helpers.LoadConfig().AppsDomain
 
 	BeforeEach(func() {
+		appName = generator.RandomName()
+
 		createDockerAppPayload = `{"name": "%s",
 								   "memory":512,
 								   "instances":1,
