@@ -10,7 +10,6 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 )
 
@@ -32,14 +31,15 @@ var _ = Describe("Docker Application Lifecycle", func() {
 	BeforeEach(func() {
 		appName = generator.RandomName()
 
-		createDockerAppPayload = `{"name": "%s",
-								   "memory":512,
-								   "instances":1,
-								   "disk_quota":1024,
-								   "space_guid":"%s",
-								   "docker_image":"cloudfoundry/inigodockertest:latest",
-								   "command":"/dockerapp"}`
-
+		createDockerAppPayload = `{
+			"name": "%s",
+			"memory": 512,
+			"instances": 1,
+			"disk_quota": 1024,
+			"space_guid": "%s",
+			"docker_image": "cloudfoundry/inigodockertest:latest",
+			"command": "/dockerapp"
+		}`
 	})
 
 	JustBeforeEach(func() {
@@ -82,23 +82,23 @@ var _ = Describe("Docker Application Lifecycle", func() {
 			Ω(env_vars).Should(HaveKeyWithValue("SOME_VAR", "some_docker_value"))
 			Ω(env_vars).Should(HaveKeyWithValue("BAD_QUOTE", "'"))
 			Ω(env_vars).Should(HaveKeyWithValue("BAD_SHELL", "$1"))
-
 		})
 	})
 
-	Describe("running a docker app without a start command ", func() {
+	Describe("running a docker app without a start command", func() {
 		BeforeEach(func() {
-			createDockerAppPayload = `{"name": "%s",
-									   "memory":512,
-									   "instances":1,
-									   "disk_quota":1024,
-									   "space_guid":"%s",
-									   "docker_image":"cloudfoundry/inigodockertest:latest"}`
+			createDockerAppPayload = `{
+				"name": "%s",
+				"memory": 512,
+				"instances": 1,
+				"disk_quota": 1024,
+				"space_guid": "%s",
+				"docker_image": "cloudfoundry/inigodockertest:latest"
+			}`
 		})
 
 		It("locates and invokes the start command", func() {
 			Eventually(helpers.CurlingAppRoot(appName)).Should(Equal("0"))
-
 		})
 	})
 
@@ -111,42 +111,6 @@ var _ = Describe("Docker Application Lifecycle", func() {
 
 			Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(Equal("0"))
-		})
-	})
-
-	Describe("scaling the app", func() {
-		JustBeforeEach(func() {
-			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
-			Eventually(cf.Cf("scale", appName, "-i", "3")).Should(Exit(0))
-			Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
-		})
-
-		It("Retrieves instance information for cf app and cf apps", func() {
-			By("calling cf app")
-			app := cf.Cf("app", appName).Wait()
-			Expect(app).To(Exit(0))
-			Expect(app).To(Say("instances: [0-3]/3"))
-			Expect(app).To(Say("#0"))
-			Expect(app).To(Say("#1"))
-			Expect(app).To(Say("#2"))
-			Expect(app).ToNot(Say("#3"))
-
-			By("calling cf apps")
-			app = cf.Cf("apps").Wait()
-			Expect(app).To(Exit(0))
-			Expect(app).To(Say(appName))
-			Expect(app).To(Say("[0-3]/3"))
-		})
-	})
-
-	Describe("deleting", func() {
-		JustBeforeEach(func() {
-			Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
-		})
-
-		It("removes the application and makes the app unreachable", func() {
-			Eventually(cf.Cf("app", appName)).Should(Say("not found"))
-			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
 		})
 	})
 })
