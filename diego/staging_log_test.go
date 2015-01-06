@@ -24,14 +24,15 @@ var _ = Describe("An application being staged with Diego", func() {
 	})
 
 	It("has its staging log streamed during a push", func() {
-		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", ZIP_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
+		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "--no-start"), CF_PUSH_TIMEOUT).Should(Exit(0))
 		Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
 
 		start := cf.Cf("start", appName)
 
 		Eventually(start, CF_PUSH_TIMEOUT).Should(Exit(0))
 		Expect(start).Should(Say("Downloaded app package"))
-		Expect(start).Should(Say("Staging\\.\\.\\."))
+		Expect(start).Should(Say(`Downloaded ruby_buildpack \(\d+(\.\d+)?[KMb]\)`))
+		Expect(start).Should(Say(`Staging\.\.\.`))
 		Expect(start).Should(Say("Staging complete"))
 		Expect(start).Should(Say("Uploading complete"))
 	})
