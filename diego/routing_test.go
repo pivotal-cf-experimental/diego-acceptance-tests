@@ -31,6 +31,9 @@ var _ = Describe("Adding and removing routes", func() {
 	It("should be able to add and remove routes", func() {
 		secondHost := generator.RandomName()
 
+		By("changing the environment")
+		Eventually(cf.Cf("set-env", appName, "WHY", "force-app-update")).Should(Exit(0))
+
 		By("adding a route")
 		Eventually(cf.Cf("map-route", appName, helpers.LoadConfig().AppsDomain, "-n", secondHost)).Should(Exit(0))
 		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
