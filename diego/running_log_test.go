@@ -43,8 +43,8 @@ var _ = Describe("Logs from apps hosted by Diego", func() {
 			By("logging health checks")
 			logs = cf.Cf("logs", appName, "--recent")
 			Eventually(logs).Should(Exit(0))
-			Ω(logs.Out).Should(Say("\\[HEALTH\\]\\s+OUT healthcheck passed"))
-			Ω(logs.Out).Should(Say("\\[HEALTH\\]\\s+OUT Exit status 0"))
+			Ω(logs.Out).Should(Say("\\[HEALTH/0\\]\\s+OUT healthcheck passed"))
+			Ω(logs.Out).Should(Say("\\[HEALTH/0\\]\\s+OUT Exit status 0"))
 
 			By("logging application stdout")
 			message = "A message from stdout"
@@ -52,7 +52,7 @@ var _ = Describe("Logs from apps hosted by Diego", func() {
 
 			logs = cf.Cf("logs", appName, "--recent")
 			Eventually(logs).Should(Exit(0))
-			Ω(logs.Out).Should(Say(fmt.Sprintf("\\[App/0\\]\\s+OUT %s", message)))
+			Ω(logs.Out).Should(Say(fmt.Sprintf("\\[APP/0\\]\\s+OUT %s", message)))
 
 			By("logging application stderr")
 			message = "A message from stderr"
@@ -60,7 +60,7 @@ var _ = Describe("Logs from apps hosted by Diego", func() {
 
 			logs = cf.Cf("logs", appName, "--recent")
 			Eventually(logs).Should(Exit(0))
-			Ω(logs.Out).Should(Say(fmt.Sprintf("\\[App/0\\]\\s+ERR %s", message)))
+			Ω(logs.Out).Should(Say(fmt.Sprintf("\\[APP/0\\]\\s+ERR %s", message)))
 		})
 	})
 })
