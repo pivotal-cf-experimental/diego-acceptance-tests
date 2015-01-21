@@ -18,7 +18,7 @@ To run the Diego Acceptance tests, you will need:
 The following script will configure these prerequisites for a [bosh-lite](https://github.com/cloudfoundry/bosh-lite)
 installation. Replace credentials and URLs as appropriate for your environment.
 
-NOTE: The secure_address must be some inaccessible endpoint from any container, e.g., the file_server endpoint.
+NOTE: The secure_address must be some inaccessible endpoint from any container, e.g., an etcd endpoint
 
 ```bash
 #! /bin/bash
@@ -29,7 +29,7 @@ cat > integration_config.json <<EOF
   "admin_user": "admin",
   "admin_password": "admin",
   "apps_domain": "10.244.0.34.xip.io",
-  "secure_address": "10.244.17.10:8080",
+  "secure_address": "10.244.16.2:4001",
   "skip_ssl_validation": true
 }
 EOF
