@@ -91,19 +91,18 @@ var _ = Describe("Application Lifecycle", func() {
 			Eventually(func() []string {
 				return differentIDsFrom(idsBefore)
 			}, 10*time.Second).Should(HaveLen(1))
+		})
 
-			// PENDING #83638712
+		It("being reported as 'flapping' after enough crashes", func() {
+			By("pushing it")
+			Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "-c", "/bin/false", "--no-start", "-b", "ruby_buildpack"), CF_PUSH_TIMEOUT).Should(Exit(0))
 
-			// By("being reported as 'flapping' after enough crashes")
-			// for i := 0; i < (4 - 1); i++ { // 1 is already counted from above
-			// 	idsBefore := reportedIDs(2)
-			// 	helpers.CurlApp(appName, "/sigterm/KILL")
-			// 	Eventually(func() []string {
-			// 		return differentIDsFrom(idsBefore)
-			// 	}).Should(HaveLen(1))
-			// }
-			//
-			// Eventually(cf.Cf("app", appName)).Should(Say("flapping"))
+			By("staging and running it on Diego")
+			Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
+			Eventually(cf.Cf("set-env", appName, DIEGO_RUN_BETA, "true")).Should(Exit(0))
+			Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(1))
+
+			Eventually(cf.Cf("app", appName)).Should(Say("crashing"))
 		})
 	})
 })
