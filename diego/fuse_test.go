@@ -23,7 +23,7 @@ var _ = Describe("FUSE", func() {
 		Eventually(cf.Cf("delete", appName, "-f")).Should(Exit(0))
 	})
 
-	FIt("can mount a fuse endpoint", func() {
+	It("can mount a fuse endpoint", func() {
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Fuse, "--no-start"), CF_PUSH_TIMEOUT).Should(Exit(0))
 		Eventually(cf.Cf("set-env", appName, "DIEGO_STAGE_BETA", "true")).Should(Exit(0))
 		Eventually(cf.Cf("set-env", appName, "DIEGO_RUN_BETA", "true")).Should(Exit(0))
