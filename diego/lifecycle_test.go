@@ -1,6 +1,8 @@
 package diego
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gbytes"
@@ -81,6 +83,27 @@ var _ = Describe("Application Lifecycle", func() {
 			Eventually(func() []string {
 				return differentIDsFrom(idsBefore)
 			}).Should(HaveLen(1))
+
+			idsBefore = reportedIDs(2)
+
+			By("recovering from crashes")
+			helpers.CurlApp(appName, "/sigterm/KILL")
+			Eventually(func() []string {
+				return differentIDsFrom(idsBefore)
+			}, 10*time.Second).Should(HaveLen(1))
+
+			// PENDING #83638712
+
+			// By("being reported as 'flapping' after enough crashes")
+			// for i := 0; i < (4 - 1); i++ { // 1 is already counted from above
+			// 	idsBefore := reportedIDs(2)
+			// 	helpers.CurlApp(appName, "/sigterm/KILL")
+			// 	Eventually(func() []string {
+			// 		return differentIDsFrom(idsBefore)
+			// 	}).Should(HaveLen(1))
+			// }
+			//
+			// Eventually(cf.Cf("app", appName)).Should(Say("flapping"))
 		})
 	})
 })
