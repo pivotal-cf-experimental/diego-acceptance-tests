@@ -37,8 +37,8 @@ var _ = Describe("Docker Application Lifecycle", func() {
 			"instances": 1,
 			"disk_quota": 1024,
 			"space_guid": "%s",
-			"docker_image": "cloudfoundry/inigodockertest:latest",
-			"command": "/dockerapp"
+			"docker_image": "cloudfoundry/diego-docker-app:latest",
+			"command": "/myapp/dockerapp"
 		}`
 	})
 
@@ -93,7 +93,7 @@ var _ = Describe("Docker Application Lifecycle", func() {
 				"instances": 1,
 				"disk_quota": 1024,
 				"space_guid": "%s",
-				"docker_image": "cloudfoundry/inigodockertest:latest"
+				"docker_image": "cloudfoundry/diego-docker-app:latest"
 			}`
 		})
 
