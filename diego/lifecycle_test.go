@@ -93,7 +93,7 @@ var _ = Describe("Application Lifecycle", func() {
 			}, 10*time.Second).Should(HaveLen(1))
 		})
 
-		It("being reported as 'flapping' after enough crashes", func() {
+		It("being reported as 'crashed' after enough crashes", func() {
 			By("pushing it")
 			Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "-c", "/bin/false", "--no-start", "-b", "ruby_buildpack"), CF_PUSH_TIMEOUT).Should(Exit(0))
 
@@ -102,7 +102,7 @@ var _ = Describe("Application Lifecycle", func() {
 			Eventually(cf.Cf("set-env", appName, DIEGO_RUN_BETA, "true")).Should(Exit(0))
 			Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(1))
 
-			Eventually(cf.Cf("app", appName)).Should(Say("crashing"))
+			Eventually(cf.Cf("app", appName)).Should(Say("crashed"))
 		})
 	})
 })
