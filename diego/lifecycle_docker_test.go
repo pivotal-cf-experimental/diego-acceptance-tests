@@ -13,18 +13,9 @@ import (
 	. "github.com/onsi/gomega/gexec"
 )
 
-type SpaceJson struct {
-	Resources []struct {
-		Metadata struct {
-			Guid string
-		}
-	}
-}
-
-var createDockerAppPayload string
-
 var _ = Describe("Docker Application Lifecycle", func() {
 	var appName string
+	var createDockerAppPayload string
 
 	domain := helpers.LoadConfig().AppsDomain
 
@@ -38,24 +29,16 @@ var _ = Describe("Docker Application Lifecycle", func() {
 			"disk_quota": 1024,
 			"space_guid": "%s",
 			"docker_image": "cloudfoundry/diego-docker-app:latest",
-			"command": "/myapp/dockerapp"
+			"command": "/myapp/dockerapp",
+			"diego": true
 		}`
 	})
 
 	JustBeforeEach(func() {
-		url := fmt.Sprintf("/v2/spaces?q=name%%3A%s", context.RegularUserContext().Space)
-		jsonResults := SpaceJson{}
-		curl := cf.Cf("curl", url).Wait()
-		Expect(curl).To(Exit(0))
-
-		json.Unmarshal(curl.Out.Contents(), &jsonResults)
-		spaceGuid := jsonResults.Resources[0].Metadata.Guid
-		Expect(spaceGuid).NotTo(Equal(""))
+		spaceGuid := guidForSpaceName(context.RegularUserContext().Space)
 
 		payload := fmt.Sprintf(createDockerAppPayload, appName, spaceGuid)
 		Eventually(cf.Cf("curl", "/v2/apps", "-X", "POST", "-d", payload)).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, DIEGO_RUN_BETA, "true")).Should(Exit(0))
 		Eventually(cf.Cf("create-route", context.RegularUserContext().Space, domain, "-n", appName)).Should(Exit(0))
 		Eventually(cf.Cf("map-route", appName, domain, "-n", appName)).Should(Exit(0))
 		Eventually(cf.Cf("start", appName), DOCKER_IMAGE_DOWNLOAD_DEFAULT_TIMEOUT).Should(Exit(0))
@@ -93,7 +76,8 @@ var _ = Describe("Docker Application Lifecycle", func() {
 				"instances": 1,
 				"disk_quota": 1024,
 				"space_guid": "%s",
-				"docker_image": "cloudfoundry/diego-docker-app:latest"
+				"docker_image": "cloudfoundry/diego-docker-app:latest",
+				"diego": true
 			}`
 		})
 

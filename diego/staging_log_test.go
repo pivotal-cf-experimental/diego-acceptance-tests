@@ -25,7 +25,7 @@ var _ = Describe("An application being staged with Diego", func() {
 
 	It("has its staging log streamed during a push", func() {
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "--no-start"), CF_PUSH_TIMEOUT).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
+		enableDiego(appName)
 
 		start := cf.Cf("start", appName)
 

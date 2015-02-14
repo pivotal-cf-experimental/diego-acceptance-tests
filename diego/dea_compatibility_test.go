@@ -16,7 +16,7 @@ var _ = Describe("DEA Compatibility", func() {
 
 	BeforeEach(func() {
 		appName = generator.RandomName()
-		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", ZIP_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
+		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", GIT_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
 	})
 
 	AfterEach(func() {
@@ -26,22 +26,28 @@ var _ = Describe("DEA Compatibility", func() {
 
 	Describe("An app staged with Diego and running on a DEA", func() {
 		BeforeEach(func() {
-			Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
+			enableDiego(appName)
 			Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
+			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 		})
 
 		It("comes up", func() {
+			disableDiego(appName)
+			Eventually(cf.Cf("restart", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 		})
 	})
 
 	Describe("An app staged on the DEA and running on Diego", func() {
 		BeforeEach(func() {
-			Eventually(cf.Cf("set-env", appName, DIEGO_RUN_BETA, "true")).Should(Exit(0))
+			disableDiego(appName)
 			Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
+			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 		})
 
 		It("comes up", func() {
+			enableDiego(appName)
+			Eventually(cf.Cf("restart", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 		})
 	})

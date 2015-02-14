@@ -43,8 +43,7 @@ var _ = Describe("Security Groups", func() {
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Dora, "--no-start", "-b", "ruby_buildpack"), CF_PUSH_TIMEOUT).Should(Exit(0))
 
 		By("staging and running it on Diego")
-		Eventually(cf.Cf("set-env", appName, DIEGO_STAGE_BETA, "true")).Should(Exit(0))
-		Eventually(cf.Cf("set-env", appName, DIEGO_RUN_BETA, "true")).Should(Exit(0))
+		enableDiego(appName)
 		Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
 
 		By("verifying it's up")
