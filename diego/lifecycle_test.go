@@ -63,13 +63,22 @@ var _ = Describe("Application Lifecycle", func() {
 			By("verifying it's up")
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Dora!"))
 
+			By("checking its LANG")
+			Ω(helpers.CurlApp(appName, "/env/LANG")).Should(ContainSubstring("en_US.UTF-8"))
+
 			By("stopping it")
 			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
 
+			By("setting an environment variable")
+			Eventually(cf.Cf("set-env", appName, "LANG", "en_GB.ISO8859-1")).Should(Exit(0))
+
 			By("starting it")
 			Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Dora!"))
+
+			By("checking its LANG")
+			Ω(helpers.CurlApp(appName, "/env/LANG")).Should(ContainSubstring("en_GB.ISO8859-1"))
 
 			By("scaling it")
 			Eventually(cf.Cf("scale", appName, "-i", "2")).Should(Exit(0))

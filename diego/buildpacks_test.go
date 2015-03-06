@@ -3,6 +3,7 @@ package diego
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega/gbytes"
 	. "github.com/onsi/gomega/gexec"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
@@ -47,7 +48,9 @@ var _ = Describe("Buildpacks", func() {
 	It("stages with a git buildpack and runs on diego", func() {
 		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", GIT_NULL_BUILDPACK), CF_PUSH_TIMEOUT).Should(Exit(0))
 		enableDiego(appName)
-		Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(0))
+		session := cf.Cf("start", appName)
+		Eventually(session, CF_PUSH_TIMEOUT).Should(Exit(0))
+		Ω(session).Should(Say("LANG=en_US.UTF-8"))
 		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 	})
 })
