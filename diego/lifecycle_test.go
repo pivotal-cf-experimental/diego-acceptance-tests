@@ -66,6 +66,10 @@ var _ = Describe("Application Lifecycle", func() {
 			By("checking its LANG")
 			Ω(helpers.CurlApp(appName, "/env/LANG")).Should(ContainSubstring("en_US.UTF-8"))
 
+			By("verifying the buildpack's detect never runs")
+			appGuid := guidForAppName(appName)
+			Eventually(cf.Cf("curl", "/v2/apps/"+appGuid)).Should(Say(`"detected_buildpack": ""`))
+
 			By("stopping it")
 			Eventually(cf.Cf("stop", appName)).Should(Exit(0))
 			Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
