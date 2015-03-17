@@ -3,6 +3,9 @@ package diego
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"regexp"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -65,6 +68,23 @@ var _ = Describe("Docker Application Lifecycle", func() {
 			Ω(env_vars).Should(HaveKeyWithValue("SOME_VAR", "some_docker_value"))
 			Ω(env_vars).Should(HaveKeyWithValue("BAD_QUOTE", "'"))
 			Ω(env_vars).Should(HaveKeyWithValue("BAD_SHELL", "$1"))
+		})
+
+		It("stores the public image in the private registry", func() {
+			cfLogs := cf.Cf("logs", appName, "--recent")
+			Ω(cfLogs.Wait()).To(Exit(0))
+			contents := string(cfLogs.Out.Contents())
+
+			r := regexp.MustCompile(".*Docker image will be cached as .*/([0-z,-]+)")
+			imageName := r.FindStringSubmatch(contents)[1]
+
+			client := http.Client{}
+			resp, err := client.Get(fmt.Sprintf("http://10.244.2.6:8080/v1/search?q=%s", imageName))
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(resp.StatusCode).Should(Equal(http.StatusOK))
+			bytes, err := ioutil.ReadAll(resp.Body)
+			Ω(err).ShouldNot(HaveOccurred())
+			Ω(string(bytes)).Should(ContainSubstring("library/" + imageName))
 		})
 	})
 
