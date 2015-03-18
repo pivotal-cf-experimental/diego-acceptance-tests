@@ -114,6 +114,7 @@ var _ = Describe("Application Lifecycle", func() {
 			Eventually(cf.Cf("start", appName), CF_PUSH_TIMEOUT).Should(Exit(1))
 
 			Eventually(cf.Cf("app", appName)).Should(Say("crashed"))
+			Eventually(cf.Cf("events", appName)).Should(Say("app.crash"))
 		})
 	})
 })
