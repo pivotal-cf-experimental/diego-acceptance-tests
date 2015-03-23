@@ -42,5 +42,9 @@ var _ = Describe("Adding and removing routes", func() {
 		Eventually(cf.Cf("unmap-route", appName, helpers.LoadConfig().AppsDomain, "-n", secondHost)).Should(Exit(0))
 		Eventually(helpers.CurlingAppRoot(secondHost)).Should(ContainSubstring("404"))
 		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
+
+		By("deleting the original route")
+		Eventually(cf.Cf("delete-route", helpers.LoadConfig().AppsDomain, "-n", appName, "-f")).Should(Exit(0))
+		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("404"))
 	})
 })
