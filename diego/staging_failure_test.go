@@ -69,8 +69,8 @@ var _ = Describe("When staging fails", func() {
 			}).Should(gbytes.Say("Failed to stage application: insufficient resources"))
 
 			app := cf.Cf("app", appName)
-			Eventually(app).Should(Exit(1))
-			Ω(app.Out).Should(gbytes.Say("message: Insufficient resources"))
+			Eventually(app).Should(Exit(0))
+			Ω(app.Out).Should(gbytes.Say("requested state: stopped"))
 		})
 	})
 })
