@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -71,7 +72,7 @@ var _ = Describe("Security Groups", func() {
 		rulesPath := file.Name()
 		securityGroupName := fmt.Sprintf("DATS-SG-%s", generator.RandomName())
 
-		cf.AsUser(context.AdminUserContext(), func() {
+		cf.AsUser(context.AdminUserContext(), time.Minute, func() {
 			Eventually(cf.Cf("create-security-group", securityGroupName, rulesPath)).Should(Exit(0))
 			Eventually(
 				cf.Cf("bind-security-group",
@@ -80,7 +81,7 @@ var _ = Describe("Security Groups", func() {
 					context.RegularUserContext().Space)).Should(Exit(0))
 		})
 		defer func() {
-			cf.AsUser(context.AdminUserContext(), func() {
+			cf.AsUser(context.AdminUserContext(), time.Minute, func() {
 				Eventually(cf.Cf("delete-security-group", securityGroupName, "-f")).Should(Exit(0))
 			})
 		}()
@@ -94,7 +95,7 @@ var _ = Describe("Security Groups", func() {
 		Expect(doraCurlResponse.ReturnCode).Should(Equal(0))
 
 		// unapply security group
-		cf.AsUser(context.AdminUserContext(), func() {
+		cf.AsUser(context.AdminUserContext(), time.Minute, func() {
 			Eventually(
 				cf.Cf("unbind-security-group",
 					securityGroupName, context.RegularUserContext().Org,

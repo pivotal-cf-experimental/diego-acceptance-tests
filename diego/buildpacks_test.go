@@ -53,4 +53,12 @@ var _ = Describe("Buildpacks", func() {
 		Ω(session).Should(Say("LANG=en_US.UTF-8"))
 		Eventually(helpers.CurlingAppRoot(appName)).Should(ContainSubstring("Hi, I'm Bash!"))
 	})
+
+	It("advertises the stack as CF_STACK when staging on diego", func() {
+		Eventually(cf.Cf("push", appName, "-p", assets.NewAssets().Standalone, "--no-start", "-b", GIT_NULL_BUILDPACK, "-s", "cflinuxfs2"), CF_PUSH_TIMEOUT).Should(Exit(0))
+		enableDiego(appName)
+		session := cf.Cf("start", appName)
+		Eventually(session, CF_PUSH_TIMEOUT).Should(Exit(0))
+		Ω(session).Should(Say("CF_STACK=cflinuxfs2"))
+	})
 })
