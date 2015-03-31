@@ -1,11 +1,10 @@
 package docker
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
+	"regexp"
 
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
@@ -21,10 +20,6 @@ var _ = Describe("Docker Registry", func() {
 	var createDockerAppPayload string
 
 	domain := helpers.LoadConfig().AppsDomain
-
-	type AppSummary struct {
-		DockerImage string `json:"docker_image"`
-	}
 
 	BeforeEach(func() {
 		appName = generator.RandomName()
@@ -63,22 +58,17 @@ var _ = Describe("Docker Registry", func() {
 		var address string
 
 		JustBeforeEach(func() {
-			appGuid := guidForAppName(appName)
+			cfLogs := cf.Cf("logs", appName, "--recent")
+			Ω(cfLogs.Wait()).To(Exit(0))
+			contents := string(cfLogs.Out.Contents())
 
-			appSummary := cf.Cf("curl", fmt.Sprintf("/v2/apps/%s/summary", appGuid))
-			Ω(appSummary.Wait()).To(Exit(0))
+			//TODO: Replace with list all droplets API (/v3/droplets)
+			r := regexp.MustCompile(".*Docker image will be cached as ([0-z.:]+)/([0-z-]+)")
+			imageParts := r.FindStringSubmatch(contents)
+			Ω(len(imageParts)).Should(Equal(3))
 
-			var appData AppSummary
-			err := json.Unmarshal(appSummary.Out.Contents(), &appData)
-			Ω(err).ShouldNot(HaveOccurred())
-
-			slashIndex := strings.Index(appData.DockerImage, "/")
-			Ω(slashIndex).ShouldNot(Equal(-1))
-			tagIndex := strings.LastIndex(appData.DockerImage, ":")
-			Ω(tagIndex).ShouldNot(Equal(-1))
-
-			address = appData.DockerImage[0:slashIndex]
-			imageName = appData.DockerImage[slashIndex+1 : tagIndex]
+			address = imageParts[1]
+			imageName = imageParts[2]
 		})
 
 		It("stores the public image in the private registry", func() {
