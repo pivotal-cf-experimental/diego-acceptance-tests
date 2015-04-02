@@ -5,6 +5,6 @@ set -e -x
 go install -v github.com/onsi/ginkgo/ginkgo
 ginkgo -r -skipPackage=operator -failFast -slowSpecThreshold=120 $@ diego
 
-if [ -n "$RUN_DRATS" ]; then
+if [ "$RUN_DRATS" = "true" ]; then
   ginkgo -r -failFast -slowSpecThreshold=120 $@ docker
 fi
