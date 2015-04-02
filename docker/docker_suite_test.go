@@ -57,7 +57,7 @@ func TestApplications(t *testing.T) {
 		environment.Teardown()
 	})
 
-	componentName := "Diego Docker"
+	componentName := "Diego-Docker"
 
 	rs := []Reporter{}
 
