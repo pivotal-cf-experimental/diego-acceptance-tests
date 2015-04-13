@@ -1,28 +1,43 @@
 # Diego Acceptance Tests (DATs)
 
-This test suite is a variant of the [CF Acceptance Tests][cats] that exercises
-[Diego](https://github.com/cloudfoundry-incubator/diego-release).
+This test suite exercises [Diego](https://github.com/cloudfoundry-incubator/diego-release) when deployed
+alongside [CF Runtime](https://github.com/cloudfoundry/cf-release) (Cloud Controller, DEAs, Loggregator, etc.).
 
-For detailed instructions on running the tests, refer to the
-[CATS readme](https://github.com/cloudfoundry/cf-acceptance-tests/blob/master/README.md).
+## Usage
 
-## Running the tests
+### Getting the tests
 
-### Test Setup
+To get these tests, you can either `git clone` this repo:
+
+```bash
+git clone https://github.com/cloudfoundry-incubator/diego-acceptance-tests $GOPATH/src/github.com/cloudfoundry-incubator
+cd $GOPATH/src/github.com/cloudfoundry-incubator
+go get -t -v ./...
+```
+
+ or `go get` it:
+
+ ```bash
+ go get -t -v github.com/cloudfoundry-incubator/diego-acceptance-tests/...
+ ```
+
+ Either way, we assume you have Golang setup on your workstation.
+
+### Test setup
 
 To run the Diego Acceptance tests, you will need:
-- a running CF instance
+- a running CF deployment
+- a running Diego deployment
 - credentials for an Admin user
-- an environment variable `$CONFIG` which points to a `.json` file that contains the application domain
+- an environment variable `CONFIG` which points to a `.json` file that contains the application domain
+- the [cf CLI](https://github.com/cloudfoundry/cli)
 
-The following script will configure these prerequisites for a [bosh-lite](https://github.com/cloudfoundry/bosh-lite)
+The following commands will setup the `CONFIG` for a [bosh-lite](https://github.com/cloudfoundry/bosh-lite)
 installation. Replace credentials and URLs as appropriate for your environment.
 
 NOTE: The secure_address must be some inaccessible endpoint from any container, e.g., an etcd endpoint
 
 ```bash
-#! /bin/bash
-
 cat > integration_config.json <<EOF
 {
   "api": "api.10.244.0.34.xip.io",
@@ -36,13 +51,10 @@ EOF
 export CONFIG=$PWD/integration_config.json
 ```
 
-If you are running the tests with version newer than 6.0.2-0bba99f of the Go CLI against bosh-lite or any other environment
-using self-signed certificates, add
+### Running the tests
+
+After correctly setting the `CONFIG` environment variable, the following command will run the tests:
 
 ```
-  "skip_ssl_validation": true
+./bin/test
 ```
-
-to your integration_config.json as well.
-
-[cats]: https://github.com/cloudfoundry/cf-acceptance-tests
