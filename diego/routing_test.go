@@ -8,7 +8,7 @@ import (
 	"github.com/cloudfoundry-incubator/cf-test-helpers/cf"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/generator"
 	"github.com/cloudfoundry-incubator/cf-test-helpers/helpers"
-	"github.com/cloudfoundry-incubator/diego-acceptance-tests/helpers/assets"
+	"github.com/pivotal-cf-experimental/diego-acceptance-tests/helpers/assets"
 )
 
 var _ = Describe("Adding and removing routes", func() {
